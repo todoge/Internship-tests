@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-3">
+    <h1 class="d-flex justify-content-center">Hello world</h1>
+    <div class="d-flex justify-content-center">
+        <table class="table table-dark table-striped">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Coin</th>
+                <th scope="col">Guess Price</th>
+                <th scope="col">Actual Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Bitcoin</td>
+                <td>$1000</td>
+                <td>$1200</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>DogeCoin</td>
+                <td>$111</td>
+                <td>$120</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Ethereum</td>
+                <td>$120</td>
+                <td>$200</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
