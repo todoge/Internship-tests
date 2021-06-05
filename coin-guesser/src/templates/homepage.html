@@ -1,39 +1,144 @@
 {% extends 'base.html' %}
+{% load mathfilters %}
 {% block content %}
-<div class="container mt-3">
-    <h1 class="d-flex justify-content-center">Hello world</h1>
+<div class="container mt-5">
+
+      <form action='.' method='POST'>{% csrf_token %}
+        <div class="row justify-content-center">
+          <div class="col-sm-3">
+            <label class="sr-only" for="coin">Coin</label>
+            <input id="coin" type="text" name='coin' class="form-control" id="coin" placeholder="Bitcoin">
+          </div>
+          <div class="col-sm-3">
+            <label class="sr-only" for="guess_price">Price USD</label>
+            <div class="input-group">
+              <input id="guess_price" type="number" class="form-control" name='guess_price' id="guess_price" placeholder="51000" min="0" step="0.01" required=True>
+            </div>
+          </div>
+          <div class="col-sm-3 pt-4">
+            <button type="submit" class="btn btn-warning" id="submit">Submit</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="my-4 p-4" style="background-color: rgba(15, 15, 15, 0.1);">
+        {% if guess_result.is_valid %}
+          <div class="row pt-2 justify-content-center">
+            <div class="container col-sm-1"></div>
+              <div class="row col">
+                <h3 class="col-sm-4 text-dark">Guess</h3>
+                <h3 class="col-sm-8 text-primary">USD {{guess_result.guess_price}}</h3>
+              </div>
+              <div class="d-flex justify-content-center col">
+                {% if guess_result.guess_price < guess_result.actual_price %}
+                  {% load static %}
+                  <img src="{% static 'images/icons8-less-than-50.png' %}" alt="lesser than">
+                {% elif guess_result.guess_price > guess_result.actual_price %}
+                  {% load static %}
+                  <img class="img-fluid" src="{% static 'images/icons8-more-than-50.png' %}" alt="greater than">
+                {% else %}
+                  {% load static %}
+                  <img class="img-fluid" src="{% static 'images/icons8-equal-sign-50.png' %}" alt="equal to">
+                {% endif %}
+              </div>
+              <div class="row col">
+              <h3 class="col-sm-4 text-dark">Actual</h3>
+              <h3 class="col-sm-8 text-primary">USD {{guess_result.actual_price}}</h3>
+              </div>
+            <div class="container col-sm-1"></div>
+          </div>
+        {% elif guess_result.message == "" %}
+        <div class="d-flex justify-content-center">
+          <h2>Guess the price of a coin!</h2>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-center">
+          <h2>{{guess_result.message}}</h2>
+        </div>
+        {% endif %}
+      </div>
+      <h2>History</h2>
     <div class="d-flex justify-content-center">
-        <table class="table table-dark table-striped">
+        <table id="table" class="table table-dark table-striped table-hover">
             <thead>
             <tr>
-                <th scope="col">#</th>
+                <th scope="col">Date</th>
                 <th scope="col">Coin</th>
                 <th scope="col">Guess Price</th>
                 <th scope="col">Actual Price</th>
+                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Bitcoin</td>
-                <td>$1000</td>
-                <td>$1200</td>
+            {% for result in history %}
+            <tr data-href='https://www.google.com'>
+                <th scope="row">{{result.created_at}}</th>
+                <td>{{result.coin}}</td>
+                <td>{{result.guess_price}}</td>
+                <td>{{result.actual_price}}</td>
+                {% if result.guess_price < result.actual_price %}
+                <td>
+                    {% load static %}
+                    <img src="{% static 'images/icons8-down-30.png' %}" alt="lesser than">
+                </td>
+                {% elif result.guess_price > result.actual_price %}
+                <td>
+                    {% load static %}
+                    <img src="{% static 'images/icons8-up-30.png' %}" alt="greater than">
+                </td>
+                {% else %}
+                <td>
+                    {% load static %}
+                    <img src="{% static 'images/icons8-equal-sign-30.png' %}" alt="equal to">
+                </td>
+                {% endif %}
             </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>DogeCoin</td>
-                <td>$111</td>
-                <td>$120</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td>Ethereum</td>
-                <td>$120</td>
-                <td>$200</td>
-            </tr>
+            {% endfor %}
             </tbody>
         </table>
-    </div>
+      </div>
+      {% if request.user.is_authenticated == False %}
+      <h5 class="d-flex justify-content-center text-muted">Sign in to view history</h5>
+      {% endif %}
+    <nav class="d-flex justify-content-center" aria-label="history navigation">
+      <ul class="pagination">
+        <li class="page-item">
+          <a class="btn page-link {% if history.has_previous == False %}disabled{% endif %}" 
+          href="?page={% if history.has_previous %}{{ history.previous_page_number }}{% else %}1{% endif %}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Previous</span>
+          </a>
+        </li>
+        {% for i in history.paginator.page_range %}
+            {% if i|sub:history.number|abs <= 1 %}
+            <li class="page-item {% if history.number == i %}disabled{% endif %}"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+        {% endfor %}
+        <li class="page-item">
+          <a class="btn page-link {% if history.has_next == False %}disabled{% endif %}" 
+          href="?page={% if history.has_next %}{{ history.next_page_number }}{% else %}{{ history.current_page_number }}{% endif %}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Next</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const rows = document.querySelectorAll("tr");
+
+    rows.forEach(row => {
+      row.addEventListener("click", () => {
+        data = row.querySelectorAll("td");
+        coin = data[0].innerText;
+        guess_price = data[1].innerText;
+        document.getElementById("coin").value = coin;
+        document.getElementById("guess_price").value = guess_price;
+      })
+    })
+  });
+</script>
 {% endblock %}
 
