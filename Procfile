@@ -1,1 +1,1 @@
-web: gunicorn src/coinguesser.wsgi
+web: gunicorn --pythonpath src coinguesser.wsgi
