@@ -1,1 +1,1 @@
-web: gunicorn src.coinguesser.wsgi --log-file -
+web: gunicorn src/coinguesser.wsgi
