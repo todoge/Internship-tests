@@ -1,0 +1,1 @@
+web: gunicorn coinguesser.wsgi --log-file -
