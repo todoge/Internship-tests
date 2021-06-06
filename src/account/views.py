@@ -1,18 +1,25 @@
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import redirect, render
 from .forms import CreateUserForm
-
+from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 
 # Create your views here.
 def registerPage(request):
     form = CreateUserForm()
-
-    if request.method == "POST":
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('/')
-
+    if request.user.is_authenticated:
+        return redirect("/")
+    else:
+        if request.method == "POST":
+            form = CreateUserForm(request.POST)
+            if form.is_valid():
+                form.save()
+                print(form)
+                print(form.cleaned_data)
+                user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+                login(request, user)
+                return HttpResponseRedirect("/")
+            
     context = {
         'form': form,
     }
