@@ -15,15 +15,6 @@ def homepage_view(request, *args, **kwargs):
 
     if request.user.is_authenticated:
         results = Result._meta.model.objects.filter(author=request.user).order_by('-created_at')
-        
-    page = request.GET.get('page', 1)
-    paginator = Paginator(results, 5)
-    try:
-        results = paginator.page(page)
-    except PageNotAnInteger:
-        results = paginator.page(1)
-    except EmptyPage:
-        results = paginator.page(paginator.num_pages)
 
     if request.method == "POST":
         form = RawGuessForm(request.POST)
@@ -40,6 +31,7 @@ def homepage_view(request, *args, **kwargs):
                     if request.user.is_authenticated:
                         now = timezone.now()
                         result = Result.objects.create_result(coin=coin_id, guess_price=guess_price, actual_price=actual_price, author=request.user, created_at=now)
+                        results = Result._meta.model.objects.filter(author=request.user).order_by('-created_at')
                         Result.save(result)
                 except:
                     is_valid = False
@@ -51,6 +43,15 @@ def homepage_view(request, *args, **kwargs):
             is_valid = False
             message = "Please enter a valid coin and price"
 
+    page = request.GET.get('page', 1)
+    paginator = Paginator(results, 5)
+    try:
+        results = paginator.page(page)
+    except PageNotAnInteger:
+        results = paginator.page(1)
+    except EmptyPage:
+        results = paginator.page(paginator.num_pages)
+        
     context = {
         'history' : results,
         'guess_result' : {
